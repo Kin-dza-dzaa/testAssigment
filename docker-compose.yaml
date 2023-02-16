@@ -1,0 +1,43 @@
+version: '0.1'
+services:
+  saltapi:
+    build: ./Salt service service 1/
+    restart: always
+    networks:
+      - user_network
+    volumes:
+      - ./Salt service service 1/config:/usr/src/app/config
+    command: ["/usr/src/app/app"]
+  userapi:
+    build: ./User service service 2/
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - saltapi
+      - mongo
+    networks:
+      - db_network
+      - user_network
+    volumes:  
+      - ./User service service 2/config:/usr/src/app/config
+    command: ["/usr/src/app/app"]      
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 12345
+    networks:
+      - db_network
+    volumes:
+      - ./mongo_db:/data/db
+    
+      
+networks:
+  user_network:
+    driver: bridge
+    name: user_api
+  db_network:
+    driver: bridge
+    name: db_mongo
